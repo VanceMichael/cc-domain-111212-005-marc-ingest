@@ -9,8 +9,13 @@ def response(raw, status=200, headers=None, **options):
 def scenario():
     fixtures = samples()
     routes = {}
-    routes['GET /delivery'] = [response(fixtures['sample.mrc'],status=200)]
-    routes['GET /correction'] = [response(fixtures['revision.mrc'],status=200)]
+    routes['GET /delivery'] = [response(fixtures['sample.mrc'], status=200)]
+    routes['GET /correction'] = [response(fixtures['revision.mrc'], status=200)]
+    routes['GET /resend'] = [response(fixtures['resend.mrc'], status=200)]
+    routes['GET /repeated'] = [response(fixtures['repeated.mrc'], status=200)]
+    routes['GET /agencies'] = [response(fixtures['agencies.mrc'], status=200)]
+    routes['GET /truncated'] = [response(fixtures['truncated-tail.mrc'], status=200)]
+    routes['GET /latin1'] = [response(fixtures['latin1.mrc'], status=200)]
     return routes
 
 def main():

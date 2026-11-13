@@ -1,17 +1,17 @@
+"""来源检查：按声明字节边界逐条切分，不扫描猜测。"""
+
+from marc import BoundaryError, parse_batch
+
+
 def inspect_bytes(data):
-    result = []
-    offset = 0
-    while offset < len(data):
-        if len(data) - offset < 24:
-            raise ValueError('记录 leader 截断')
-        leader = data[offset:offset + 24]
-        length = int(leader[:5])
-        base = int(leader[12:17])
-        if length < 25 or base < 25 or base > length or offset + length > len(data):
-            raise ValueError('记录长度或字段起点越界')
-        if data[offset + length - 1] != 29:
-            raise ValueError('记录缺少结束符')
-        result.append({'offset': offset, 'length': length, 'base': base,
-                       'encoding': chr(leader[9])})
-        offset += length
-    return result
+    batch = parse_batch(data)
+    if not batch['complete']:
+        stopped = batch['stopped']
+        raise BoundaryError(stopped['code'], stopped['reason'], stopped['offset'],
+                            **{key: value for key, value in stopped.items()
+                               if key not in ('code', 'reason', 'offset', 'trusted')})
+    return [{'offset': record['offset'], 'length': record['length'],
+             'base': record['base'], 'encoding': record['leader']['encoding'],
+             'status': record['status'],
+             'error_codes': [error.get('code') for error in record['errors']]}
+            for record in batch['records']]
